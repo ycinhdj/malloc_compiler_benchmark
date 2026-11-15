@@ -4,6 +4,7 @@ This project benchmarks the performance (execution time) of the standard C memor
 
 ## Files
 
+- `malloc_benchmark.c`: C source code of the benchmark. For each size it times `malloc` (allocating the buffer and writing to all of it), `realloc` (growing the buffer to twice its size and writing to all of it) and `free`, and appends the results to `performance_results.csv`. The compiler name is detected at build time.
 - `performance_results.csv`: The raw benchmark data used for the figures (Clang, MSVC, GCC (MSYS2) and GCC (WSL2)), with the columns `Test Name` (Allocation, Reallocation or Free), `Compiler`, `Size of Data` (bytes) and `Speed` (time in seconds).
 - Result sets for each combination of compilers, in the same format:
   - [`clang_msvc/`](clang_msvc): Clang and MSVC.
@@ -18,9 +19,17 @@ This project benchmarks the performance (execution time) of the standard C memor
 
 ### 1. Running Benchmarks
 
-The CSV files were produced by running the same benchmark program built with each compiler.
+Build `malloc_benchmark.c` with each compiler (with optimizations, e.g. `-O2` or `/O2`, in 64-bit mode) and run each executable from the same folder, so that all results are appended to the same `performance_results.csv`:
 
-*Note: The source code of the benchmark program is not included in this repository; only its results are.*
+```bash
+clang -O2 -o malloc_benchmark_clang malloc_benchmark.c     # Clang
+cl /O2 malloc_benchmark.c                                  # MSVC (Developer Command Prompt)
+gcc -O2 -o malloc_benchmark_gcc malloc_benchmark.c         # GCC (MSYS2, MSYS2 UCRT64 or WSL2)
+```
+
+The program takes three optional arguments: the largest size in GiB (default 20), the number of repetitions (default 10) and the size step in bytes (default 1 GiB). For example, `malloc_benchmark 4 3` runs sizes 1 to 4 GiB three times each.
+
+*Note: The reallocation step needs twice the tested size, so the largest sizes need about 40 GiB of free memory; the program stops when an allocation fails.*
 
 ### 2. Generating Plots
 
